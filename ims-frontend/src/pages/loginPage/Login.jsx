@@ -278,6 +278,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../AuthContext/AuthContext';
 import './Login.css';
+import AnimatedBackground from '../../components/animatedBackground/AnimatedBackground';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -325,6 +326,7 @@ const Login = () => {
 
   return (
     <div className="login-container">
+      <AnimatedBackground/>
       <div className="login-box">
         {/* Header */}
         <div className="login-header">

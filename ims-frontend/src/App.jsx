@@ -19,10 +19,10 @@
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './AuthContext/AuthContext';
-import Login from './pages/login page /Login';
-import Signup from './pages/signup page/Signup';
-import ForgotPassword from './pages/forgetpassword page/ForgotPassword';
-import ResetPassword from './pages/reset password page/ResetPassword';
+import Login from './pages/loginPage/Login';
+import Signup from './pages/signupPage/Signup';
+import ForgotPassword from './pages/forgetpasswordPage/ForgotPassword';
+import ResetPassword from './pages/resetPasswordPage/ResetPassword';
 import Admin from './pages/Admin';
 import Receiver from './pages/Receiver';
 

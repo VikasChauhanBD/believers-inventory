@@ -338,6 +338,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext/AuthContext';
 import './Signup.css';
+import AnimatedBackground from '../../components/animatedBackground/AnimatedBackground';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -398,6 +399,7 @@ const Signup = () => {
 
   return (
     <div className="signup-page">
+      <AnimatedBackground/>
       <div className="signup-card">
         {/* Header */}
         <div className="signup-header">
