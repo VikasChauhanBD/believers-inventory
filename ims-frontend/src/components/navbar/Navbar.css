@@ -8,12 +8,17 @@
   width: 70%;
   margin: 0 auto;
   padding: 0 16px;
+
+  /* FIX: Proper alignment */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
 }
 
 .navbar-logo {
   display: flex;
   align-items: center;
-  height: 64px;
   gap: 12px;
 }
 
@@ -49,6 +54,9 @@
   color: #6b7280;
   margin: 0;
 }
+
+/* ---------------- USER SECTION ---------------- */
+
 .navbar-actions {
   display: flex;
   align-items: center;
@@ -59,35 +67,52 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #fff;
+  color: #111827; /* FIX: visible text */
   font-size: 14px;
 }
 
 .user-role {
-  color: #a0aec0;
+  color: #6b7280;
   font-size: 12px;
   text-transform: capitalize;
 }
+
+/* ---------------- LOGOUT BUTTON FIX ---------------- */
 
 .logout-btn {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  /* FIX: Make button visible */
+  background: #2563eb;
+  border: none;
   border-radius: 8px;
-  color: #fff;
+  color: #ffffff;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
 }
 
 .logout-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: #1d4ed8;
   transform: translateY(-2px);
 }
 
-/* ------------------------- Responsive Style ----------------------- */
+/* ---------------- Profile Link ---------------- */
+
+.profile-link {
+  text-decoration: none;
+  font-size: 14px;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.profile-link:hover {
+  text-decoration: underline;
+}
+
+/* ---------------- Responsive ---------------- */
 
 @media (max-width: 1440px) {
   .navbar-container {
@@ -104,5 +129,9 @@
 @media (max-width: 768px) {
   .navbar-container {
     width: 95%;
+    flex-direction: column;
+    height: auto;
+    padding: 10px 16px;
+    gap: 10px;
   }
 }

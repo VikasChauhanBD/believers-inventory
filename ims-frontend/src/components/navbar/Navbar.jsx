@@ -21,7 +21,7 @@
 
 import { Package, LogOut, User } from "lucide-react";
 import { useAuth } from "../../AuthContext/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -30,12 +30,13 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
+        {/* LEFT SIDE - LOGO */}
         <div className="navbar-logo">
           <div className="logo-icon">
             <Package className="logo-package" />
@@ -46,13 +47,16 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* USER INFO & LOGOUT */}
+        {/* RIGHT SIDE - USER + LOGOUT */}
         <div className="navbar-actions">
-          <div className="user-info">
-            <User size={20} />
-            <span>{user?.full_name || user?.email}</span>
-            <span className="user-role">({user?.role})</span>
-          </div>
+          <NavLink to="/profile" className="profile-link">
+            <div className="user-info">
+              <User size={20} />
+              <span>{user?.full_name || user?.email}</span>
+              <span className="user-role">({user?.role})</span>
+            </div>
+          </NavLink>
+
           <button onClick={handleLogout} className="logout-btn">
             <LogOut size={18} />
             <span>Logout</span>
