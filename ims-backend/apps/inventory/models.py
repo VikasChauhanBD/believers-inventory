@@ -87,7 +87,9 @@ class Assignment(models.Model):
     """Model for device assignments to employees"""
     
     STATUS_CHOICES = [
+        ('pending_approval', 'Pending Admin Approval'),
         ('active', 'Active'),
+        ('pending_return', 'Pending Return Approval'),
         ('returned', 'Returned'),
         ('lost', 'Lost'),
         ('damaged', 'Damaged'),
@@ -106,7 +108,37 @@ class Assignment(models.Model):
     return_date = models.DateTimeField(null=True, blank=True)
     expected_return_date = models.DateField(null=True, blank=True)
     
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='pending_approval')
+    
+    # Assignment approval
+    assignment_image = models.ImageField(upload_to='assignments/', null=True, blank=True)
+    assignment_approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assignments_approved'
+    )
+    assignment_approved_date = models.DateTimeField(null=True, blank=True)
+    assignment_undertaking = models.BooleanField(default=False)  # Employee acknowledges responsibility
+    
+    # Return approval
+    return_image = models.ImageField(upload_to='returns/', null=True, blank=True)
+    return_approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='returns_approved'
+    )
+    return_approved_date = models.DateTimeField(null=True, blank=True)
+    device_condition_on_return = models.CharField(
+        max_length=20,
+        choices=Device.CONDITION_CHOICES,
+        blank=True,
+        help_text='Device condition when returned'
+    )
+    device_broken = models.BooleanField(default=False)  # Whether device was broken
     
     # Notes
     assignment_notes = models.TextField(blank=True)
@@ -138,10 +170,13 @@ class Assignment(models.Model):
         # Update device status based on assignment status
         if self.status == 'active':
             self.device.status = 'assigned'
-        elif self.status == 'returned':
-            self.device.status = 'available'
+        elif self.status in ['returned', 'pending_return']:
+            if not self.device.assignments.filter(status='active').exists():
+                self.device.status = 'available'
         elif self.status in ['lost', 'damaged']:
             self.device.status = 'maintenance'
+        elif self.status == 'pending_approval':
+            self.device.status = 'assigned'
         
         self.device.save(update_fields=['status'])
 

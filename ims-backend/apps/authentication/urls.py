@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from .views import (
     EmployeeDetailView,
     EmployeeListCreateView,
+    EmployeeListView,
     SignupView,
     LoginView,
     LogoutView,
@@ -32,6 +33,7 @@ urlpatterns = [
     path('password/reset/confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('password/reset/verify/', VerifyTokenView.as_view(), name='verify_reset_token'),
 
-    path('employees/', EmployeeListCreateView.as_view()),
-    path('employees/<uuid:pk>/', EmployeeDetailView.as_view()),
+    # Employees
+    path('employees/', EmployeeListView.as_view(), name='employee_list'),
+    path('employees/<uuid:pk>/', EmployeeDetailView.as_view(), name='employee_detail'),
 ]

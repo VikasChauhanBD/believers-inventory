@@ -57,6 +57,8 @@ class AssignmentSerializer(serializers.ModelSerializer):
     device_details = DeviceListSerializer(source='device', read_only=True)
     employee_details = EmployeeSerializer(source='employee', read_only=True)
     assigned_by_name = serializers.SerializerMethodField()
+    assignment_approved_by_name = serializers.SerializerMethodField()
+    return_approved_by_name = serializers.SerializerMethodField()
     
     class Meta:
         model = Assignment
@@ -64,24 +66,42 @@ class AssignmentSerializer(serializers.ModelSerializer):
             'id', 'device', 'device_details', 'employee', 'employee_details',
             'assigned_date', 'return_date', 'expected_return_date',
             'status', 'assignment_notes', 'return_notes',
-            'assigned_by', 'assigned_by_name'
+            'assigned_by', 'assigned_by_name',
+            'assignment_image', 'assignment_approved_by', 'assignment_approved_by_name',
+            'assignment_approved_date', 'assignment_undertaking',
+            'return_image', 'return_approved_by', 'return_approved_by_name',
+            'return_approved_date', 'device_condition_on_return', 'device_broken'
         ]
-        read_only_fields = ['id', 'assigned_date', 'assigned_by']
+        read_only_fields = [
+            'id', 'assigned_date', 'assigned_by',
+            'assignment_approved_by', 'assignment_approved_date',
+            'return_approved_by', 'return_approved_date', 'return_date'
+        ]
     
     def get_assigned_by_name(self, obj):
         if obj.assigned_by:
             return obj.assigned_by.full_name
         return None
     
+    def get_assignment_approved_by_name(self, obj):
+        if obj.assignment_approved_by:
+            return obj.assignment_approved_by.full_name
+        return None
+    
+    def get_return_approved_by_name(self, obj):
+        if obj.return_approved_by:
+            return obj.return_approved_by.full_name
+        return None
+    
     def validate(self, attrs):
         """Validate assignment data"""
         device = attrs.get('device')
-        status = attrs.get('status', 'active')
+        status = attrs.get('status', 'pending_approval')
         
         # Check if device is available for new assignments
-        if self.instance is None and status == 'active':
+        if self.instance is None and status in ['active', 'pending_approval']:
             if device.status == 'assigned':
-                active_assignment = device.assignments.filter(status='active').first()
+                active_assignment = device.assignments.filter(status__in=['active', 'pending_approval']).first()
                 if active_assignment:
                     raise serializers.ValidationError(
                         f"Device is already assigned to {active_assignment.employee.full_name}"
@@ -101,13 +121,19 @@ class AssignmentListSerializer(serializers.ModelSerializer):
     device_id = serializers.CharField(source='device.device_id', read_only=True)
     employee_name = serializers.CharField(source='employee.full_name', read_only=True)
     employee_email = serializers.EmailField(source='employee.email', read_only=True)
+    assignment_approved_by_name = serializers.CharField(
+        source='assignment_approved_by.full_name',
+        read_only=True,
+        allow_null=True
+    )
     
     class Meta:
         model = Assignment
         fields = [
             'id', 'device', 'device_name', 'device_id',
             'employee', 'employee_name', 'employee_email',
-            'assigned_date', 'status'
+            'assigned_date', 'status', 'assignment_approved_by_name',
+            'assignment_image', 'assignment_undertaking'
         ]
 
 

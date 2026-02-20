@@ -117,6 +117,14 @@ class LogoutView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
+class EmployeeListView(generics.ListAPIView):
+    """List all employees"""
+    
+    permission_classes = [IsAuthenticated]
+    serializer_class = EmployeeSerializer
+    queryset = Employee.objects.filter(is_active=True).order_by('-date_joined')
+
+
 class CurrentEmployeeView(generics.RetrieveUpdateAPIView):
     """Get or update current employee profile"""
     

@@ -141,13 +141,112 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         serializer.save(assigned_by=self.request.user)
     
     @action(detail=True, methods=['post'])
-    def return_device(self, request, pk=None):
-        """Mark assignment as returned"""
+    def approve_assignment(self, request, pk=None):
+        """Admin approves device assignment with image verification"""
+        assignment = self.get_object()
+        
+        # Only admin/manager can approve
+        if request.user.role not in ['admin', 'manager']:
+            return Response({
+                'error': 'Only admin/manager can approve assignments'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        if assignment.status != 'pending_approval':
+            return Response({
+                'error': 'Only pending assignments can be approved'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get image and approval data
+        image = request.FILES.get('assignment_image')
+        undertaking = request.data.get('assignment_undertaking', False)
+        
+        if not image:
+            return Response({
+                'error': 'Assignment image is required for approval'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        assignment.assignment_image = image
+        assignment.assignment_undertaking = undertaking
+        assignment.assignment_approved_by = request.user
+        assignment.assignment_approved_date = timezone.now()
+        assignment.status = 'active'
+        assignment.save()
+        
+        serializer = self.get_serializer(assignment)
+        return Response({
+            'message': 'Assignment approved successfully',
+            'assignment': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['post'])
+    def request_return(self, request, pk=None):
+        """Employee requests device return"""
         assignment = self.get_object()
         
         if assignment.status != 'active':
             return Response({
-                'error': 'Only active assignments can be returned'
+                'error': 'Only active assignments can request return'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        assignment.status = 'pending_return'
+        assignment.return_notes = request.data.get('return_notes', '')
+        assignment.save()
+        
+        serializer = self.get_serializer(assignment)
+        return Response({
+            'message': 'Return request submitted',
+            'assignment': serializer.data
+        })
+    
+    @action(detail=True, methods=['post'])
+    def approve_return(self, request, pk=None):
+        """Admin approves device return with image verification"""
+        assignment = self.get_object()
+        
+        # Only admin/manager can approve
+        if request.user.role not in ['admin', 'manager']:
+            return Response({
+                'error': 'Only admin/manager can approve returns'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        if assignment.status != 'pending_return':
+            return Response({
+                'error': 'Only pending returns can be approved'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get image data
+        image = request.FILES.get('return_image')
+        device_condition = request.data.get('device_condition_on_return', 'good')
+        device_broken = request.data.get('device_broken', False)
+        
+        if not image:
+            return Response({
+                'error': 'Return image is required for approval'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        assignment.return_image = image
+        assignment.device_condition_on_return = device_condition
+        assignment.device_broken = device_broken
+        assignment.return_approved_by = request.user
+        assignment.return_approved_date = timezone.now()
+        assignment.return_date = timezone.now()
+        assignment.status = 'returned'
+        assignment.save()
+        
+        serializer = self.get_serializer(assignment)
+        return Response({
+            'message': 'Return approved successfully',
+            'assignment': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['post'])
+    def return_device(self, request, pk=None):
+        """Mark assignment as returned (deprecated - use approve_return instead)"""
+        assignment = self.get_object()
+        
+        if assignment.status not in ['active', 'pending_return']:
+            return Response({
+                'error': 'Only active or pending return assignments can be returned'
             }, status=status.HTTP_400_BAD_REQUEST)
         
         assignment.status = 'returned'
